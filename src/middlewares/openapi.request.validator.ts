@@ -2,6 +2,7 @@ import * as Ajv from 'ajv';
 import { validationError } from '../errors';
 import ono from 'ono';
 import * as draftSchema from 'ajv/lib/refs/json-schema-draft-04.json';
+import { Request } from 'express';
 
 const TYPE_JSON = 'application/json';
 
@@ -105,11 +106,15 @@ export class RequestValidator {
     return ajv;
   }
 
-  validate(req, res, next) {
+  validate(req, res, next, ignore?: (req: Request) => boolean) {
     if (!req.openapi) {
       // this path was not found in open api and
       // this path is not defined under an openapi base path
       // skip it
+      return next();
+    }
+
+    if (ignore && ignore(req)) {
       return next();
     }
 
